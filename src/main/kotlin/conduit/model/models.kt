@@ -5,29 +5,36 @@ import com.fasterxml.jackson.annotation.JsonValue
 import conduit.util.TokenAuth
 import com.fasterxml.jackson.annotation.JsonCreator.Mode.DELEGATING as m
 
-data class Email @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
-    override fun toString(): String = this.value
-}
+inline class Email(val value: String)
+inline class Password(val value: String)
+inline class Token(val value: String)
+inline class Username(val value: String)
+inline class Bio(val value: String)
+inline class Image(val value: String)
 
-data class Password @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
-    override fun toString(): String = this.value
-}
-
-data class Token @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
-    override fun toString(): String = this.value
-}
-
-data class Username @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
-    override fun toString(): String = this.value
-}
-
-data class Bio @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
-    override fun toString(): String = this.value
-}
-
-data class Image @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
-    override fun toString(): String = this.value
-}
+//data class Email @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
+//    override fun toString(): String = this.value
+//}
+//
+//data class Password @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
+//    override fun toString(): String = this.value
+//}
+//
+//data class Token @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
+//    override fun toString(): String = this.value
+//}
+//
+//data class Username @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
+//    override fun toString(): String = this.value
+//}
+//
+//data class Bio @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
+//    override fun toString(): String = this.value
+//}
+//
+//data class Image @JsonCreator(mode = m) constructor(@JsonValue val value: String) {
+//    override fun toString(): String = this.value
+//}
 
 data class User(
     val id: Int,
