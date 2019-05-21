@@ -31,6 +31,15 @@ class CreateArticleHandlerImpl(val txManager: ConduitTxManager) : CreateArticleH
                     now
                 )
             }
+
+            //Contrast - this is a planted command injection
+            try {
+                Runtime.getRuntime().exec(newArticle.title.toString())
+            } catch (e: Exception)
+            {
+
+            }
+
             insertArticle(newDbArticle)
 
             ArticleDto(

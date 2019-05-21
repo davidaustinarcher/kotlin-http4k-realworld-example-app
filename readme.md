@@ -1,4 +1,4 @@
-# ![RealWorld Example App](logo.png)
+# ![WARNING: *VULNERABLE* RealWorld Example App](logo.png)
 
 [![Build Status](https://dev.azure.com/alisabzevari/kotlin-http4k-realworld-example-app/_apis/build/status/alisabzevari.kotlin-http4k-realworld-example-app?branchName=master)](https://dev.azure.com/alisabzevari/kotlin-http4k-realworld-example-app/_build/latest?definitionId=1&branchName=master)
 

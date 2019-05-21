@@ -14,10 +14,6 @@ plugins {
     application
 }
 
-application {
-    mainClassName = "conduit.MainKt"
-}
-
 repositories {
     mavenCentral()
     jcenter()
@@ -46,6 +42,27 @@ dependencies {
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.2")
     testImplementation("io.mockk:mockk:1.9.3")
 }
+
+
+
+application {
+    // Define the main class for the application.
+    mainClassName = "conduit.MainKt"
+    applicationDefaultJvmArgs = listOf("-javaagent:contrast.jar", "-Dcontrast.standalone.appname='Kotlin-http4k'")
+}
+
+tasks {
+    withType<Jar> {
+        manifest {
+            attributes(mapOf("Main-Class" to application.mainClassName))
+        }
+
+        from(configurations.compile.get().map { if (it.isDirectory) it else zipTree(it) })
+    }
+
+}
+
+
 
 val test by tasks.getting(Test::class) {
     useJUnitPlatform { }

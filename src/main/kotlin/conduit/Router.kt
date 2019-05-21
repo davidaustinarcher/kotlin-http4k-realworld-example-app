@@ -8,10 +8,15 @@ import conduit.util.TokenAuth
 import conduit.util.createErrorResponse
 import org.http4k.core.*
 import org.http4k.filter.ServerFilters
+import org.http4k.filter.CorsPolicy
 import org.http4k.lens.*
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
+import org.http4k.lens.Query
+import org.http4k.core.ContentType.Companion.TEXT_HTML
+import org.slf4j.LoggerFactory
+
 
 class Router(
     val login: LoginHandler,
@@ -37,8 +42,12 @@ class Router(
     private val contexts = RequestContexts()
     private val tokenInfoKey = RequestContextKey.required<TokenAuth.TokenInfo>(contexts)
 
+    private val UnsafeGlobalPermissiveNew = CorsPolicy(listOf("*"), listOf("content-type,authorization"), Method.values().toList())
+
     operator fun invoke(): RoutingHttpHandler =
+
         CatchHttpExceptions()
+            .then(ServerFilters.Cors(UnsafeGlobalPermissiveNew))
             .then(ServerFilters.CatchLensFailure { error ->
                 createErrorResponse(
                     Status.BAD_REQUEST,
@@ -49,6 +58,7 @@ class Router(
             .then(
                 routes(
                     "/healthcheck" bind Method.GET to { Response(Status.OK) },
+                    "/search" bind Method.GET to search(),
                     "/api/users" bind routes(
                         "/login" bind Method.POST to login(),
                         "/" bind routes(
@@ -91,6 +101,21 @@ class Router(
 
     private val loginLens = Body.auto<LoginUserRequest>().toLens()
     private val userLens = Body.auto<UserResponse>().toLens()
+
+    val term = Query.required("term")
+    private fun search() = { req: Request ->
+        var term: String = term(req)
+        //Contrast - this is a planted XSS
+        val msg = "Your search for $term has no results"
+
+        //Contrast - this is a planted log injection
+        val logger = LoggerFactory.getLogger("main")
+        // Uncomment below to santise log
+        // term = term.replace('\n', '_').replace('\r', '_')
+        logger.info("Someone searched for: $term")
+
+        Response(Status.OK).with(Body.string(TEXT_HTML).toLens() of msg)
+    }
 
     private fun login() = { req: Request ->
         val result = login(loginLens(req).user)

@@ -6,9 +6,15 @@ Configuration:
       name: STDOUT
       PatternLayout:
         Pattern: "[%-5level] %c{1.} - %m%n"
+    File:
+      name: Contrast
+      fileName: Application.log
+      PatternLayout:
+        Pattern: "[%-5level] %c{1.} - %m%n"
 
   Loggers:
     Root:
       level: info
       AppenderRef:
-        ref: STDOUT
+        - ref: STDOUT
+        - ref: Contrast
