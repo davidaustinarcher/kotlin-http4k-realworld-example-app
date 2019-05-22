@@ -65,7 +65,7 @@ tasks {
 
 
 val test by tasks.getting(Test::class) {
-    jvmArgs = listOf("-javaagent:contrast.jar", "-Dcontrast.env=qa", "-Dcontrast.standalone.appname=kotlin-http4k", "-Dcontrast.override.appversion=" + findProperty("sha"))
+    jvmArgs = listOf("-javaagent:contrast.jar", "-Dcontrast.env=qa", "-Dcontrast.standalone.appname=Kotlin-http4k", "-Dcontrast.override.appversion=" + findProperty("sha"))
     useJUnitPlatform { }
 }
 

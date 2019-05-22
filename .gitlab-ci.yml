@@ -24,9 +24,9 @@ contrast_verify:
   script:
     - BASEURL="https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST_ORG_ID"
     - CURLCMD="curl -HAccept:application/json -HAPI-Key:$CONTRAST__API_KEY -HAuthorization:$CONTRAST__AUTHORIZATION"
-    - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "filterText=$APP_NAME" --data-urlencode "filterServers=$CI_RUNNER_DESCRIPTION" "$BASEURL/applications/name")
+    - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "filterText=$APP_NAME" "$BASEURL/applications/name")
     - APP_ID=$( echo ${MYARRAY[@]} | jq -r '.applications[0].app_id' )
-    - echo "The app id for the app called $APP_NAME is $APP_ID. Checking for $SEVERITIES vulnerabilities on the server $CI_RUNNER_DESCRIPTION for the build commit $CI_COMMIT_SHORT_SHA."
+    - echo "The app id for the app called $APP_NAME is $APP_ID. Checking for $SEVERITIES vulnerabilities for the build commit $CI_COMMIT_SHORT_SHA."
     - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "appVersionTags=$CI_COMMIT_SHORT_SHA" --data-urlencode "severities=$SEVERITIES" "$BASEURL/traces/$APP_ID/quick")
     - VULN_COUNT=$( echo ${MYARRAY[@]} | jq -r '.filters[1].count' )
     - echo "The vulnerability count is $VULN_COUNT."
