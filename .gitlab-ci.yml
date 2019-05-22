@@ -26,6 +26,7 @@ contrast_verify:
     - CURLCMD="curl -HAccept:application/json -HAPI-Key:$CONTRAST__API_KEY -HAuthorization:$CONTRAST__AUTHORIZATION"
     - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "filterText=$APP_NAME" "$BASEURL/applications/name")
     - APP_ID=$( echo ${MYARRAY[@]} | jq -r '.applications[0].app_id' )
+    - echo ${MYARRAY[@]}
     - echo "The app id for the app called $APP_NAME is $APP_ID. Checking for $SEVERITIES vulnerabilities for the build commit $CI_COMMIT_SHORT_SHA."
     - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "appVersionTags=$CI_COMMIT_SHORT_SHA" --data-urlencode "severities=$SEVERITIES" "$BASEURL/traces/$APP_ID/quick")
     - VULN_COUNT=$( echo ${MYARRAY[@]} | jq -r '.filters[1].count' )
