@@ -1,4 +1,4 @@
-image: java:latest
+image: gradle:jre11
 
 stages:
   - build
@@ -17,4 +17,4 @@ run_tests:
 contrast_verify:
   stage: verify
   script:
-    - apt-get update -qq && apt-get --assume-yes install jq
+    - sudo apt-get update && apt-get --assume-yes install jq
