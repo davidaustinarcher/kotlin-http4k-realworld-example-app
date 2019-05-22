@@ -65,7 +65,6 @@ tasks {
 
 
 val test by tasks.getting(Test::class) {
-    systemProperty "sha",System.getProperty("sha")
     jvmArgs = listOf("-javaagent:contrast.jar", "-Dcontrast.standalone.appname='kotlin-http4k'", "-Dcontrast.override.appversion=$sha")
     useJUnitPlatform { }
 }
