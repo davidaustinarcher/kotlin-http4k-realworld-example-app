@@ -1,5 +1,5 @@
 before_script:
-  - apt-get update -qq && apt-get install jq
+  - apt-get --assume-yes update -qq && apt-get install jq
 
 stages:
   - prepare
