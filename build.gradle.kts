@@ -48,7 +48,7 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClassName = "conduit.MainKt"
-    applicationDefaultJvmArgs = listOf("-javaagent:contrast.jar", "-Dcontrast.standalone.appname='Kotlin-http4k'")
+    applicationDefaultJvmArgs = listOf("-javaagent:contrast.jar", "-Dcontrast.standalone.appname=Kotlin-http4k")
 }
 
 tasks {

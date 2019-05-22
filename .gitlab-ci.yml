@@ -1,12 +1,14 @@
-image: gradle:jre11
-
 stages:
   - build
   - test
   - verify
   - deploy
 
+variables:
+  APP_NAME: "Kotlin-http4k"
+
 run_tests:
+  image: gradle:jre11
   stage: test
   script:
     - CONTRAST__BASEURL=https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST__ORG_ID;
@@ -15,6 +17,13 @@ run_tests:
     - ./gradlew build -Psha=$CI_COMMIT_SHORT_SHA
 
 contrast_verify:
+  image: cfmanteiga/alpine-bash-curl-jq:latest
   stage: verify
   script:
-    - sudo apt-get update && apt-get --assume-yes install jq
+    - BASEURL="https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST_ORG"
+    - CURLCMD="curl -HAccept:application/json -HAPI-Key:$CONTRAST_API_KEY -HAuthorization:$CONTRAST_AUTHORIZATION"
+    - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "filterText=$APP_NAME" --data-urlencode "filterServers=$CI_RUNNER_ID" "$BASEURL/applications/name")
+    - APP_ID=$( echo ${MYARRAY[@]} | jq -r '.applications[0].app_id' )
+    - echo "The app id matching this name is $APP_ID"
+    - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "appVersionTags=f4d01a85" --data-urlencode "severities=HIGH" "$BASEURL/traces/$APP_ID/quick")
+    - echo ${MYARRAY[@]} | jq -r '.filters[1].count'
