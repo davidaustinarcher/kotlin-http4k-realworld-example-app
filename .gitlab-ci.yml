@@ -20,8 +20,8 @@ contrast_verify:
   image: cfmanteiga/alpine-bash-curl-jq:latest
   stage: verify
   script:
-    - BASEURL="https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST_ORG"
-    - CURLCMD="curl -HAccept:application/json -HAPI-Key:$CONTRAST_API_KEY -HAuthorization:$CONTRAST_AUTHORIZATION"
+    - BASEURL="https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST_ORG_ID"
+    - CURLCMD="curl -HAccept:application/json -HAPI-Key:$CONTRAST__API_KEY -HAuthorization:$CONTRAST__AUTHORIZATION"
     - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "filterText=$APP_NAME" --data-urlencode "filterServers=$CI_RUNNER_ID" "$BASEURL/applications/name")
     - APP_ID=$( echo ${MYARRAY[@]} | jq -r '.applications[0].app_id' )
     - echo "The app id matching this name is $APP_ID"
