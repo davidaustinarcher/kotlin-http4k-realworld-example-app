@@ -1,0 +1,21 @@
+before_script:
+  - apt-get update -qq && apt-get install jq
+
+stages:
+  - prepare
+  - build
+  - test
+  - verify
+
+contrast_install:
+  stage: prepare
+  script:
+    - CONTRAST__BASEURL=https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST__ORG_ID;
+    - curl --max-time 30 $CONTRAST__BASEURL/agents/default/java -H API-Key:$CONTRAST__API_KEY -H Authorization:$CONTRAST__AUTHORIZATION -o contrast.jar
+    - curl --max-time 30 $CONTRAST__BASEURL/agents/external/default/java -H Accept:text/yaml -H API-Key:$CONTRAST__API_KEY -H Authorization:$CONTRAST__AUTHORIZATION -o contrast_security.yaml
+
+run_tests:
+  stage: test
+  script: ./gradlew build
+
+

@@ -65,6 +65,7 @@ tasks {
 
 
 val test by tasks.getting(Test::class) {
+    jvmArgs = listOf("-javaagent:contrast.jar", "-Dcontrast.standalone.appname='kotlin-http4k'")
     useJUnitPlatform { }
 }
 
