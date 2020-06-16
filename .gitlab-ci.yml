@@ -10,7 +10,7 @@ variables:
   FAIL_THRESHOLD: 0
 
 run_tests:
-  image: gradle:jre11
+  image: gradle:jdk11
   stage: test
   script:
     - CONTRAST__BASEURL=https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST__ORG_ID;
