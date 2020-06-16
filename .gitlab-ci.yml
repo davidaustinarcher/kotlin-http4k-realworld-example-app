@@ -28,7 +28,12 @@ contrast_verify:
     - APP_ID=$( echo ${MYARRAY[@]} | jq -r '.applications[0].app_id' )
     - echo ${MYARRAY[@]}
     - echo "The app id for the app called $APP_NAME is $APP_ID. Checking for $SEVERITIES vulnerabilities for the build commit $CI_COMMIT_SHORT_SHA."
-    - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "appVersionTags=$CI_COMMIT_SHORT_SHA" --data-urlencode "severities=$SEVERITIES" "$BASEURL/traces/$APP_ID/quick")
+    - declare -a MYARRAY=$($CURLCMD -G $BASEURL/metadata/session/$APP_ID/filters)
+    - echo ${MYARRAY[@]}
+    - BUILDNUMID=$( echo ${MYARRAY[@]} | jq -r '.filters|map(select(any(.label; contains("Build Number")))|.id)[0]' )
+    - COMMITHASHID=$( echo ${MYARRAY[@]} | jq -r '.filters|map(select(any(.label; contains("Commit Hash")))|.id)[0]' )
+    - JSON="[{\"fieldID\":\"$COMMITHASHID\",\"values\":[\"$CI_COMMIT_SHORT_SHA\"]},{\"fieldID\":\"$BUILDNUMID\",\"values\":[\"$CI_PIPELINE_URL\"]}]"
+    - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "metadataFilters=$JSON" --data-urlencode "severities=$SEVERITIES" "$BASEURL/traces/$APP_ID/quick")
     - VULN_COUNT=$( echo ${MYARRAY[@]} | jq -r '.filters[1].count' )
     - echo "The vulnerability count is $VULN_COUNT."
     - if [ $VULN_COUNT -gt $FAIL_THRESHOLD ]; then exit 1; fi
