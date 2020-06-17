@@ -65,7 +65,12 @@ tasks {
 
 
 val test by tasks.getting(Test::class) {
-    jvmArgs = listOf("-javaagent:contrast.jar", "-Dcontrast.env=qa", "-Dcontrast.standalone.appname=Kotlin-http4k", "-Dcontrast.override.appversion=" + findProperty("sha"))
+    jvmArgs = listOf("-javaagent:contrast.jar",
+                    "-Dcontrast.env=qa",
+                    "-Dcontrast.standalone.appname=Kotlin-http4k",
+                    "-Dcontrast.override.appversion=" + System.getenv("CI_COMMIT_SHORT_SHA"),
+                    "-Dcontrast.application.session_metadata=buildNumber=" + System.getenv("CI_PIPELINE_URL") + ",commitHash=" + System.getenv("CI_COMMIT_SHORT_SHA")
+                    )
     useJUnitPlatform { }
 }
 

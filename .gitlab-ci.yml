@@ -6,29 +6,40 @@ stages:
 
 variables:
   APP_NAME: "Kotlin-http4k"
-  SEVERITIES: "HIGH"
+  SEVERITIES: "HIGH,CRITICAL"
   FAIL_THRESHOLD: 0
 
 run_tests:
-  image: gradle:jre11
+  image: gradle:jdk11
   stage: test
   script:
-    - CONTRAST__BASEURL=https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST__ORG_ID;
+    - CONTRAST__BASEURL=https://${CONTRAST_HOST:-eval.contrastsecurity.com}/Contrast/api/ng/$CONTRAST__ORG_ID;
     - curl --max-time 30 $CONTRAST__BASEURL/agents/default/java -H API-Key:$CONTRAST__API_KEY -H Authorization:$CONTRAST__AUTHORIZATION -o contrast.jar
     - curl --max-time 30 $CONTRAST__BASEURL/agents/external/default/java -H Accept:text/yaml -H API-Key:$CONTRAST__API_KEY -H Authorization:$CONTRAST__AUTHORIZATION -o contrast_security.yaml
-    - ./gradlew build -Psha=$CI_COMMIT_SHORT_SHA
+    - ./gradlew build
 
 contrast_verify:
   image: cfmanteiga/alpine-bash-curl-jq:latest
   stage: verify
   script:
-    - BASEURL="https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST__ORG_ID"
+    # Define some variables we'll use several times
+    - BASEURL="https://${CONTRAST_HOST:-eval.contrastsecurity.com}/Contrast/api/ng/$CONTRAST__ORG_ID"
     - CURLCMD="curl -HAccept:application/json -HAPI-Key:$CONTRAST__API_KEY -HAuthorization:$CONTRAST__AUTHORIZATION"
+    # Lookup the application ID of the named application
     - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "filterText=$APP_NAME" "$BASEURL/applications/name")
     - APP_ID=$( echo ${MYARRAY[@]} | jq -r '.applications[0].app_id' )
     - echo ${MYARRAY[@]}
-    - echo "The app id for the app called $APP_NAME is $APP_ID. Checking for $SEVERITIES vulnerabilities for the build commit $CI_COMMIT_SHORT_SHA."
-    - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "appVersionTags=$CI_COMMIT_SHORT_SHA" --data-urlencode "severities=$SEVERITIES" "$BASEURL/traces/$APP_ID/quick")
+    - echo "The app id for the app called $APP_NAME is $APP_ID. Checking for $SEVERITIES vulnerabilities with commitHash=$CI_COMMIT_SHORT_SHA,buildNumber=$CI_PIPELINE_URL."
+    # Lookup session metadata fields on this application
+    - declare -a MYARRAY=$($CURLCMD -G $BASEURL/metadata/session/$APP_ID/filters)
+    # Find the session metadata field IDs for the buildNumber and commitHash fields
+    - BUILDNUMID=$( echo ${MYARRAY[@]} | jq -r '.filters|map(select(any(.label; contains("Build Number")))|.id)[0]' )
+    - COMMITHASHID=$( echo ${MYARRAY[@]} | jq -r '.filters|map(select(any(.label; contains("Commit Hash")))|.id)[0]' )
+    # Build the metadata filter JSON we'll use to search for vulnerabilities
+    - BUILDMETADATAFILTER="[{\"fieldID\":\"$COMMITHASHID\",\"values\":[\"$CI_COMMIT_SHORT_SHA\"]},{\"fieldID\":\"$BUILDNUMID\",\"values\":[\"$CI_PIPELINE_URL\"]}]"
+    # Search for vulnerabilities on this application found during this test run
+    - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "metadataFilters=$BUILDMETADATAFILTER" --data-urlencode "severities=$SEVERITIES" "$BASEURL/traces/$APP_ID/quick")
     - VULN_COUNT=$( echo ${MYARRAY[@]} | jq -r '.filters[1].count' )
     - echo "The vulnerability count is $VULN_COUNT."
+    # Fail if there are more vulnerabilities than the defined threshold
     - if [ $VULN_COUNT -gt $FAIL_THRESHOLD ]; then exit 1; fi
