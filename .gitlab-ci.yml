@@ -13,7 +13,7 @@ run_tests:
   image: gradle:jdk11
   stage: test
   script:
-    - CONTRAST__BASEURL=https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST__ORG_ID;
+    - CONTRAST__BASEURL=https://${CONTRAST_HOST:-eval.contrastsecurity.com}/Contrast/api/ng/$CONTRAST__ORG_ID;
     - curl --max-time 30 $CONTRAST__BASEURL/agents/default/java -H API-Key:$CONTRAST__API_KEY -H Authorization:$CONTRAST__AUTHORIZATION -o contrast.jar
     - curl --max-time 30 $CONTRAST__BASEURL/agents/external/default/java -H Accept:text/yaml -H API-Key:$CONTRAST__API_KEY -H Authorization:$CONTRAST__AUTHORIZATION -o contrast_security.yaml
     - ./gradlew build
@@ -23,7 +23,7 @@ contrast_verify:
   stage: verify
   script:
     # Define some variables we'll use several times
-    - BASEURL="https://eval.contrastsecurity.com/Contrast/api/ng/$CONTRAST__ORG_ID"
+    - BASEURL="https://${CONTRAST_HOST:-eval.contrastsecurity.com}/Contrast/api/ng/$CONTRAST__ORG_ID"
     - CURLCMD="curl -HAccept:application/json -HAPI-Key:$CONTRAST__API_KEY -HAuthorization:$CONTRAST__AUTHORIZATION"
     # Lookup the application ID of the named application
     - declare -a MYARRAY=$($CURLCMD -G --data-urlencode "filterText=$APP_NAME" "$BASEURL/applications/name")
